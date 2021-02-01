@@ -1,5 +1,7 @@
 package edu.bit.practice.service.stock.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import edu.bit.practice.netty.NettyClient;
 import edu.bit.practice.repository.StockInfoRepository;
 import edu.bit.practice.repository.dao.StockInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,8 @@ public class StockServiceImpl {
     private RestTemplate restTemplate;
     @Autowired
     private StockInfoRepository stockInfoRepository;
+    @Autowired
+    private NettyClient nettyClient;
 
     @Scheduled(cron="0/5 * * * * ?")
     public void getStockInfo(){
@@ -36,5 +40,7 @@ public class StockServiceImpl {
         stockInfo.setStartPrice(info[2]);
         stockInfo.setEndPrice(info[3]);
         stockInfoRepository.save(stockInfo);
+
+        nettyClient.write(JSONObject.toJSONString(stockInfo));
     }
 }
