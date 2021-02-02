@@ -15,6 +15,7 @@
  */
 package edu.bit.practice.netty;
 
+import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -90,8 +91,9 @@ public final class NettyClient {
         }
     }
 
-    public void write(String s){
+    public void write(Object o){
         initNettyClient();
+        String s= JSONObject.toJSONString(o);
         ChannelFuture c=channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(s, CharsetUtil.UTF_8));
     }
 

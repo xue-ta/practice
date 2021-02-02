@@ -1,6 +1,10 @@
 package edu.bit.practice.service.stock.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import edu.bit.practice.handler.Handler;
+import edu.bit.practice.handler.HandlerManager;
+import edu.bit.practice.handler.stockhandler.NettyHandler;
+import edu.bit.practice.handler.stockhandler.RepositoryHandler;
 import edu.bit.practice.netty.NettyClient;
 import edu.bit.practice.repository.StockInfoRepository;
 import edu.bit.practice.repository.dao.StockInfo;
@@ -24,9 +28,9 @@ public class StockServiceImpl {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    private StockInfoRepository stockInfoRepository;
-    @Autowired
-    private NettyClient nettyClient;
+    private HandlerManager handlerManager;
+
+
 
     @Scheduled(cron="0/5 * * * * ?")
     public void getStockInfo(){
@@ -35,16 +39,17 @@ public class StockServiceImpl {
         param.put("list",PING_AN_STOCK_CODE);
         ResponseEntity<String> res=restTemplate.getForEntity(STOCK_INFO,String.class,param);
         String[] info=res.getBody().substring(21,46).split(",");
+
+        StockInfo stockInfo=toStockInfo(info);
+
+        handlerManager.handle(stockInfo);
+    }
+
+    private StockInfo toStockInfo(String[] info){
         StockInfo stockInfo =new StockInfo();
         stockInfo.setStockName(info[0]);
         stockInfo.setStartPrice(info[2]);
         stockInfo.setEndPrice(info[3]);
-        stockInfoRepository.save(stockInfo);
-
-        try {
-            nettyClient.write(JSONObject.toJSONString(stockInfo));
-        }catch (Exception e){
-            ;
-        }
+        return stockInfo;
     }
 }
