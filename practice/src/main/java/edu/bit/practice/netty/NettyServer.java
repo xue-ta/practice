@@ -28,16 +28,22 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * Echoes back any received data from a client.
  */
-public final class EchoServer {
+@Component
+public final class NettyServer {
 
     static final boolean SSL = System.getProperty("ssl") != null;
     static final int PORT = Integer.parseInt(System.getProperty("port", "8007"));
 
-    public void intEchoServer() throws Exception {
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+
+    @PostConstruct
+    public void startEchoServer() throws Exception {
         // Configure SSL.
         final SslContext sslCtx;
         if (SSL) {
@@ -48,15 +54,13 @@ public final class EchoServer {
         }
 
         // Configure the server.
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        final EchoServerHandler serverHandler = new EchoServerHandler();
+        this.bossGroup = new NioEventLoopGroup(1);
+        this.workerGroup = new NioEventLoopGroup();
+        NettyServerHandler serverHandler = new NettyServerHandler();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
-             .option(ChannelOption.SO_BACKLOG, 100)
-             .handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new ChannelInitializer<SocketChannel>() {
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
@@ -64,20 +68,26 @@ public final class EchoServer {
                      if (sslCtx != null) {
                          p.addLast(sslCtx.newHandler(ch.alloc()));
                      }
-                     //p.addLast(new LoggingHandler(LogLevel.INFO));
+                     p.addLast(new LoggingHandler(LogLevel.INFO));
                      p.addLast(serverHandler);
                  }
-             });
+             }).childOption(ChannelOption.AUTO_READ, true);
 
             // Start the server.
             ChannelFuture f = b.bind(PORT).sync();
 
-            // Wait until the server socket is closed.
-            f.channel().closeFuture().sync();
+
         } finally {
-            // Shut down all event loops to terminate all threads.
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            // do nothing
+
         }
+    }
+
+    @PreDestroy
+    public void serverShutdown()  {
+
+        this.bossGroup.shutdownGracefully();
+        this.workerGroup.shutdownGracefully();
+
     }
 }

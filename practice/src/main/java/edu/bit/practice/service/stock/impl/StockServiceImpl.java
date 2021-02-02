@@ -41,6 +41,10 @@ public class StockServiceImpl {
         stockInfo.setEndPrice(info[3]);
         stockInfoRepository.save(stockInfo);
 
-        nettyClient.write(JSONObject.toJSONString(stockInfo));
+        try {
+            nettyClient.write(JSONObject.toJSONString(stockInfo));
+        }catch (Exception e){
+            ;
+        }
     }
 }

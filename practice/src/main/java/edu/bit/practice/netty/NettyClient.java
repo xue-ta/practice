@@ -16,6 +16,7 @@
 package edu.bit.practice.netty;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -23,9 +24,11 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.util.CharsetUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * Sends one message when a connection is open and echoes back any received
@@ -33,6 +36,7 @@ import javax.annotation.PostConstruct;
  * traffic between the echo client and server by sending the first message to
  * the server.
  */
+@Component
 public final class NettyClient {
 
     static final boolean SSL = System.getProperty("ssl") != null;
@@ -40,22 +44,26 @@ public final class NettyClient {
     static final int PORT = Integer.parseInt(System.getProperty("port", "8007"));
     static final int SIZE = Integer.parseInt(System.getProperty("size", "256"));
     private ChannelFuture channelFuture;
+    private NioEventLoopGroup group;
+    private Boolean init=false;
 
 
-    @PostConstruct
-    public void InitNettyClient() throws Exception {
-        // Configure SSL.git
-        final SslContext sslCtx;
-        if (SSL) {
-            sslCtx = SslContextBuilder.forClient()
-                .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-        } else {
-            sslCtx = null;
-        }
+    public void initNettyClient()  {
 
-        // Configure the client.
-        EventLoopGroup group = new NioEventLoopGroup();
+        if(init==true)
+            return;
         try {
+            // Configure SSL.git
+            final SslContext sslCtx;
+            if (SSL) {
+                sslCtx = SslContextBuilder.forClient()
+                        .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+            } else {
+                sslCtx = null;
+            }
+
+            // Configure the client.
+            group = new NioEventLoopGroup();
             Bootstrap b = new Bootstrap();
             b.group(group)
              .channel(NioSocketChannel.class)
@@ -73,20 +81,25 @@ public final class NettyClient {
              });
 
             // Start the client.
-            ChannelFuture channelFuture = b.connect(HOST, PORT).sync();
-
-            // Wait until the connection is closed.
-            channelFuture.channel().closeFuture().sync();
+            channelFuture = b.connect(HOST, PORT).sync();
+            init=true;
+        } catch (Exception e){
+            init=false;
         } finally {
-            // Shut down the event loop to terminate all threads.
-            group.shutdownGracefully();
+
         }
     }
 
     public void write(String s){
-        channelFuture.channel().write(s);
+        initNettyClient();
+        ChannelFuture c=channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(s, CharsetUtil.UTF_8));
     }
 
 
+    @PreDestroy
+    private void clientShutdown(){
+        // Shut down the event loop to terminate all threads.
+        group.shutdownGracefully();
+    }
 
 }

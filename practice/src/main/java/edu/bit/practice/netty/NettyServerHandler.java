@@ -15,19 +15,21 @@
  */
 package edu.bit.practice.netty;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
  * Handler implementation for the echo server.
  */
 @Sharable
-public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ctx.write(msg);
+        ctx.write("receive success");
     }
 
     @Override
@@ -40,5 +42,12 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         // Close the connection when an exception is raised.
         cause.printStackTrace();
         ctx.close();
+    }
+
+    private String decode(Object msg){
+        ByteBuf result = (ByteBuf) msg;
+        byte[] bytesMsg = new byte[result.readableBytes()];
+        result.readBytes(bytesMsg);
+        return new String(bytesMsg);
     }
 }
