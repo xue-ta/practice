@@ -1,4 +1,4 @@
-package edu.bit.practice.handler.stockhandler;
+package edu.bit.practice.handler.stock;
 
 
 import edu.bit.practice.handler.Handler;

@@ -1,12 +1,6 @@
 package edu.bit.practice.service.stock.impl;
 
-import com.alibaba.fastjson.JSONObject;
-import edu.bit.practice.handler.Handler;
-import edu.bit.practice.handler.HandlerManager;
-import edu.bit.practice.handler.stockhandler.NettyHandler;
-import edu.bit.practice.handler.stockhandler.RepositoryHandler;
-import edu.bit.practice.netty.NettyClient;
-import edu.bit.practice.repository.StockInfoRepository;
+import edu.bit.practice.handler.stock.StockHandlerManager;
 import edu.bit.practice.repository.dao.StockInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +22,7 @@ public class StockServiceImpl {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    private HandlerManager handlerManager;
+    private StockHandlerManager handlerManager;
 
 
 
