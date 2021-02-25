@@ -1,7 +1,7 @@
 package edu.bit.practice.handler.stock;
 
 import edu.bit.practice.handler.Handler;
-import edu.bit.practice.handler.HandlerManager;
+import edu.bit.practice.handler.HandlerChain;
 import edu.bit.practice.repository.dao.StockInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Component
-public class StockHandlerManager implements HandlerManager {
+public class StockHandlerManager implements HandlerChain {
 
 
     @Autowired
