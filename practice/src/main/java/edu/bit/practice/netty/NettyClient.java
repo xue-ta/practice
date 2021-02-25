@@ -26,6 +26,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.CharsetUtil;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -38,6 +39,7 @@ import javax.annotation.PreDestroy;
  * the server.
  */
 @Component
+@DependsOn(value = "nettyServer")
 public final class NettyClient {
 
     static final boolean SSL = System.getProperty("ssl") != null;
@@ -48,11 +50,9 @@ public final class NettyClient {
     private NioEventLoopGroup group;
     private Boolean init=false;
 
-
+    @PostConstruct
     public void initNettyClient()  {
 
-        if(init==true)
-            return;
         try {
             // Configure SSL.git
             final SslContext sslCtx;
@@ -83,16 +83,15 @@ public final class NettyClient {
 
             // Start the client.
             channelFuture = b.connect(HOST, PORT).sync();
-            init=true;
+
         } catch (Exception e){
-            init=false;
+            ;
         } finally {
 
         }
     }
 
     public void write(Object o){
-        initNettyClient();
         String s= JSONObject.toJSONString(o);
         ChannelFuture c=channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(s, CharsetUtil.UTF_8));
     }
