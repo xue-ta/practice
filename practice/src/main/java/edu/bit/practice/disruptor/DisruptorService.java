@@ -1,8 +1,11 @@
 package edu.bit.practice.disruptor;
 
+
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import edu.bit.practice.repository.dao.StockInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +18,8 @@ import java.util.concurrent.Executors;
 public class DisruptorService implements InitializingBean, DisposableBean {
 
 
+    private static  final Logger logger= LoggerFactory.getLogger(DisruptorService.class);
+
     private Disruptor<StockInfo> disruptor;
     @Value("1024")
     private int RING_BUFFER_SIZE = 1024;
@@ -23,6 +28,7 @@ public class DisruptorService implements InitializingBean, DisposableBean {
 
 
     public void receive(StockInfo s) {
+        logger.info("disruptor receive stockInfo {}",s);
         disruptor.publishEvent((event,sequence,arg0)->{
             event.setStockName(arg0.getStockName());
             event.setId(arg0.getId());
