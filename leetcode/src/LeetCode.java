@@ -2,6 +2,21 @@ import java.util.*;
 
 public class LeetCode {
 
+
+public static class TreeNode {
+      int val;
+      TreeNode left;
+      TreeNode right;
+      TreeNode() {}
+     TreeNode(int val) { this.val = val; }
+      TreeNode(int val, TreeNode left, TreeNode right) {
+          this.val = val;
+          this.left = left;
+          this.right = right;
+      }
+ }
+
+
     public LeetCode() {
     }
 
@@ -36,12 +51,47 @@ public class LeetCode {
     }
 
 
+    public String reverseWords(String s) {
+        StringBuilder sb=new StringBuilder();
+        LinkedList<Character> stack=new LinkedList<>();
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i)==' '){
+                while(!stack.isEmpty()){
+                    sb.append(stack.poll());
+                }
+                sb.append(" ");
+            }else{
+                stack.push(s.charAt(i));
+            }
+        }
+        while(!stack.isEmpty()){
+            sb.append(stack.poll());
+        }
+
+        return sb.toString();
+    }
+
+    int count=0;
+    int result=0;
+    public int kthSmallest(TreeNode root, int k) {
+        travel(root,k);
+        return result;
+    }
+
+    private void travel(TreeNode root,int k){
+        if(root.left!=null)travel(root.left,k);
+        count++;
+        if(count==k) {
+            result = root.val;
+            return;
+        }
+        if(root.right!=null)travel(root.right,k);
+    }
     public static void main(String[] args) {
 
-        int[][] items={{1,91},{1,92},{2,93},{2,97},{1,60},{2,77},{1,65},{1,87},{1,100},{2,100},{2,76}};
-
         LeetCode lt=new LeetCode();
-        lt.highFive(items);
+
+        System.out.println(lt.reverseWords("Let's take LeetCode contest"));
 
     }
 }
