@@ -504,8 +504,8 @@ public class LeetCode {
         return result;
     }
 
-        public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-            if(l1==null) return l2;
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        if(l1==null) return l2;
             if(l2==null) return l1;
             if(l1.val<l2.val){
                 l1.next=mergeTwoLists(l1.next,l2);
@@ -514,18 +514,62 @@ public class LeetCode {
                 l2.next=mergeTwoLists(l1, l2.next);
                 return l2;
             }
+    }
+
+    int len=0;
+    public int islandPerimeter(int[][] grid) {
+        for(int i=0;i<grid.length;i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if(grid[i][j]==1)
+                    dfs(grid,i,j);
+            }
         }
+        return len;
+    }
+
+    private void dfs(int[][] grid,int i,int j){
+        if(i<0||j<0||i>=grid.length||j>grid[0].length||grid[i][j]==1){
+            len++;
+        }else{
+            grid[i][j]=-1;
+            dfs(grid,i+1,j);
+            dfs(grid,i-1,j);
+            dfs(grid,i,j+1);
+            dfs(grid,i,j-1);
+        }
+    }
+
+    public int[] asteroidCollision(int[] asteroids) {
+        Stack<Integer> stack = new Stack();
+        for (int ast: asteroids) {
+            if(ast<0){
+                while(!stack.isEmpty()&&stack.peek()<Math.abs(ast)&&stack.peek()>0){
+                    stack.pop();
+                    continue;
+                }
+                if(stack.isEmpty()||stack.peek()<0){
+                    stack.push(ast);
+                }else if(stack.peek()==-ast){
+                    stack.pop();
+                }
+            }else{
+                stack.push(ast);
+            }
+        }
+
+        int[] ans = new int[stack.size()];
+        for (int t = ans.length - 1; t >= 0; --t) {
+            ans[t] = stack.pop();
+        }
+        return ans;
+    }
+
 
     public static void main(String[] args) {
         LeetCode lt = new LeetCode();
 
-        lt.dailyTemperatures(new int[]{73,74,75,71,69,72,76,73});
-
-        List<String> l=new LinkedList<>();
-        l.add("1,2,3,4");
-        l.add("5,6,7,8");
-        l.add("9");
-        l.stream().flatMap(o-> Arrays.stream(o.split(","))).collect(Collectors.toList());
+        int[] test =new int[]{-2,-1,1,2};
+        int[] result=lt.asteroidCollision(test);
 
 
     }
