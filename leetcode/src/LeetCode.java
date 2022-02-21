@@ -432,22 +432,6 @@ public class LeetCode {
         return result;
     }
 
-    public int lengthOfLongestSubstring(String s) {
-        int maxLen = 0, r = 0;
-        Set<Character> set = new HashSet<>();
-        for (int l = 0; l < s.length(); l++) {
-            set.add(s.charAt(l));
-            while (set.size() < l - r + 1) {
-                if (s.charAt(r) != s.charAt(l)) {
-                    set.remove(s.charAt(r));
-                }
-                r++;
-            }
-            maxLen = Math.max(maxLen, l - r + 1);
-        }
-        return maxLen;
-    }
-
     public int minSubArrayLen(int target, int[] nums) {
         int min = nums.length;
         for (int r = 0, l = 0; r < nums.length; r++) {
@@ -490,69 +474,57 @@ public class LeetCode {
         return sb.toString();
     }
 
-
     public int[] dailyTemperatures(int[] temperatures) {
-        LinkedList<Integer> stack=new LinkedList<>();
-        int[] result=new int[temperatures.length];
-        for (int i=0;i< temperatures.length;i++){
-            while((!stack.isEmpty())&&(temperatures[i]>temperatures[stack.peek()])){
-                int index=stack.pop();
-                result[index]=i-index;
+        LinkedList<Integer> stack = new LinkedList<>();
+        int[] result = new int[temperatures.length];
+        for (int i = 0; i < temperatures.length; i++) {
+            while ((!stack.isEmpty()) && (temperatures[i] > temperatures[stack.peek()])) {
+                int index = stack.pop();
+                result[index] = i - index;
             }
             stack.push(i);
         }
         return result;
     }
 
-    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-        if(l1==null) return l2;
-            if(l2==null) return l1;
-            if(l1.val<l2.val){
-                l1.next=mergeTwoLists(l1.next,l2);
-                return l1;
-            }else{
-                l2.next=mergeTwoLists(l1, l2.next);
-                return l2;
-            }
-    }
 
-    int len=0;
+    int len = 0;
+
     public int islandPerimeter(int[][] grid) {
-        for(int i=0;i<grid.length;i++) {
+        for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[0].length; j++) {
-                if(grid[i][j]==1)
-                    dfs(grid,i,j);
+                if (grid[i][j] == 1) dfs(grid, i, j);
             }
         }
         return len;
     }
 
-    private void dfs(int[][] grid,int i,int j){
-        if(i<0||j<0||i>=grid.length||j>grid[0].length||grid[i][j]==1){
+    private void dfs(int[][] grid, int i, int j) {
+        if (i < 0 || j < 0 || i >= grid.length || j > grid[0].length || grid[i][j] == 1) {
             len++;
-        }else{
-            grid[i][j]=-1;
-            dfs(grid,i+1,j);
-            dfs(grid,i-1,j);
-            dfs(grid,i,j+1);
-            dfs(grid,i,j-1);
+        } else {
+            grid[i][j] = -1;
+            dfs(grid, i + 1, j);
+            dfs(grid, i - 1, j);
+            dfs(grid, i, j + 1);
+            dfs(grid, i, j - 1);
         }
     }
 
     public int[] asteroidCollision(int[] asteroids) {
         Stack<Integer> stack = new Stack();
-        for (int ast: asteroids) {
-            if(ast<0){
-                while(!stack.isEmpty()&&stack.peek()<Math.abs(ast)&&stack.peek()>0){
+        for (int ast : asteroids) {
+            if (ast < 0) {
+                while (!stack.isEmpty() && stack.peek() < Math.abs(ast) && stack.peek() > 0) {
                     stack.pop();
                     continue;
                 }
-                if(stack.isEmpty()||stack.peek()<0){
+                if (stack.isEmpty() || stack.peek() < 0) {
                     stack.push(ast);
-                }else if(stack.peek()==-ast){
+                } else if (stack.peek() == -ast) {
                     stack.pop();
                 }
-            }else{
+            } else {
                 stack.push(ast);
             }
         }
@@ -564,13 +536,305 @@ public class LeetCode {
         return ans;
     }
 
+    public int[] twoSum(int[] nums, int target) {
+        HashMap<Integer, Integer> hashMap = new HashMap<>();
 
-    public static void main(String[] args) {
-        LeetCode lt = new LeetCode();
+        for (int i = 0; i < nums.length; i++) {
+            if (hashMap.containsKey(target - nums[i])) {
+                return new int[] {i, hashMap.get(target - nums[i])};
+            }
+            hashMap.put(nums[i], i);
+        }
+        return new int[] {};
+    }
 
-        int[] test =new int[]{-2,-1,1,2};
-        int[] result=lt.asteroidCollision(test);
+    /**
+     * Definition for singly-linked list.
+     * public class ListNode {
+     *     int val;
+     *     ListNode next;
+     *     ListNode() {}
+     *     ListNode(int val) { this.val = val; }
+     *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+     * }
+     */
+    static class Solution {
+        public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+            return addTwoNumbers0(l1, l2, 0);
+        }
+
+        private ListNode addTwoNumbers0(ListNode l1, ListNode l2, int c) {
+            if (l1 == null) return addTwoNumbers0(l2, c);
+            if (l2 == null) return addTwoNumbers0(l1, c);
+            ListNode root = new ListNode((l1.val + l2.val + c) % 10);
+            root.next = addTwoNumbers0(l1.next, l2.next, (l1.val + l2.val + c) / 10);
+            return root;
+        }
+
+        private ListNode addTwoNumbers0(ListNode l, int c) {
+            if (l == null && c != 0) {
+                return new ListNode(c);
+            }
+            if (l == null) return null;
+            ListNode root = new ListNode((l.val + c) % 10);
+            root.next = addTwoNumbers0(l.next, (l.val + c) / 10);
+            return root;
+        }
+    }
+
+    public int lengthOfLongestSubstring(String s) {
+        int maxLen = 0, l = 0;
+        HashMap<Character, Integer> map = new HashMap();
+        for (int r = 0; r < s.length(); r++) {
+            map.put(s.charAt(r), map.getOrDefault(s.charAt(r), 0) + 1);
+            while (map.entrySet().size() < r - l + 1) {
+                if (map.get(s.charAt(l)) > 1) {
+                    map.put(s.charAt(l), map.getOrDefault(s.charAt(l), 0) - 1);
+                } else {
+                    map.remove(s.charAt(l));
+                }
+                l++;
+            }
+            maxLen = Math.max(maxLen, r - l + 1);
+        }
+        return maxLen;
+    }
+
+    public String longestPalindrome(String s) {
+        char[] chars = s.toCharArray();
+        int start = 0, end = 0;
+        for (int i = 0; i < s.length() - 1; i++) {
+            int len1 = findLong(i, i, chars);
+            int len2 = findLong(i, i + 1, chars);
+            if (Math.max(len1, len2) > end - start) {
+                if (len1 > len2) {
+                    start = i + (len - 1) / 2;
+                    end = i + (len - 1) / 2;
+                } else {
+                    start = i + (len - 2) / 2;
+                    end = i + 1 + (len - 2) / 2;
+                }
+            }
+        }
+        return s.substring(start, end + 1);
+    }
+
+    private int findLong(int l, int r, char[] chars) {
+        while (l >= 0 && r < chars.length) {
+            if (chars[l] == chars[r]) {
+                l--;
+                r++;
+            } else break;
+        }
+        return r - l - 1;
+    }
 
 
+    public List<String> letterCombinations(String digits) {
+        List<String> combinations = new ArrayList<String>();
+        if (digits.length() == 0) {
+            return combinations;
+        }
+        Map<Character, String> phoneMap = new HashMap<Character, String>() {{
+            put('2', "abc");
+            put('3', "def");
+            put('4', "ghi");
+            put('5', "jkl");
+            put('6', "mno");
+            put('7', "pqrs");
+            put('8', "tuv");
+            put('9', "wxyz");
+        }};
+
+        backTrack(phoneMap,0,combinations,digits,new StringBuilder());
+        return combinations;
+
+    }
+
+    private void backTrack(Map<Character,String> map,int length,List<String> result,String digits,StringBuilder temp){
+        if(length==digits.length()){
+            result.add(temp.toString());
+            return;
+        }
+        for(int i=0;i<map.get(digits.charAt(length)).length();i++){
+            temp.append(map.get(digits.charAt(length)).charAt(i));
+            backTrack(map,length+1,result,digits,temp);
+            temp.deleteCharAt(length);
+        }
+    }
+
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode slow=head;
+        ListNode fast=head;
+        for(int i=0;i<n;i++){
+            fast=fast.next;
+        }
+        while(fast.next!=null){
+            fast=fast.next;
+            slow=slow.next;
+        }
+        slow.next=slow.next.next;
+        return head;
+    }
+
+    public boolean isValid(String s) {
+        HashMap<Character,Character> hashMap=new HashMap<>();
+        hashMap.put('}','{');
+        hashMap.put(']','[');
+        hashMap.put(')','(');
+        LinkedList<Character> stack=new LinkedList<>();
+        for(int i=0;i<s.length();i++){
+            if(stack.isEmpty()){
+                stack.push(s.charAt(i));
+            }else if(hashMap.get(s.charAt(i))==stack.peek()){
+                stack.pop();
+            }else{
+                stack.push(s.charAt(i));
+            }
+        }
+        return stack.isEmpty();
+    }
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        if(list1==null) return list2;
+        if(list2==null) return list1;
+        if(list1.val<list2.val){
+            list1.next=mergeTwoLists(list1.next,list2);
+            return list1;
+        }else{
+            list2.next=mergeTwoLists(list1,list2.next);
+            return list2;
+        }
+    }
+
+
+    public List<String> result0=new ArrayList<>();
+    public List<String> generateParenthesis(int n) {
+        backTrack0(new StringBuilder(),n,0,0);
+        return result0;
+    }
+
+    private void backTrack0(StringBuilder tmp,int n,int left,int right){
+        if(tmp.length()==2*n){
+            result0.add(tmp.toString());
+            return;
+        }
+        if(left<n){
+            tmp.append("(");
+            backTrack0(tmp,n,left+1,right);
+            tmp.deleteCharAt(tmp.length()-1);
+        }
+        if(left>right){
+            tmp.append(")");
+            backTrack0(tmp,n,left,right+1);
+            tmp.deleteCharAt(tmp.length()-1);
+        }
+    }
+
+    List<List<Integer>> ret=new ArrayList<>();
+    public List<List<Integer>> permute(int[] nums) {
+        backTrack(nums,new ArrayList<>(),new int[nums.length]);
+        return ret;
+    }
+
+    private void backTrack(int[] nums,List<Integer> temp,int[] mark){
+        if(temp.size()==nums.length){
+            ret.add(new ArrayList<>(temp));
+        }
+        for(int i=0;i<nums.length;i++){
+            if(mark[i]==0) {
+                mark[i]=1;
+                temp.add(nums[i]);
+                backTrack(nums,temp,mark);
+                mark[i]=0;
+                temp.remove(temp.size()-1);
+            }
+        }
+    }
+
+
+
+    public int trap(int[] height) {
+        int sum = 0;
+
+        int[] leftMax=new int[height.length];
+        int[] rightMax=new int[height.length];
+        for(int i=1;i< height.length;i++){
+            leftMax[i]=Math.max(leftMax[i-1],height[i-1]);
+        }
+        for(int j= height.length-2;j>=0;j--){
+            rightMax[j]=Math.max(leftMax[j+1],height[j+1]);
+        }
+
+        for(int i=1;i< height.length-1;i++){
+            if(Math.min(leftMax[i],rightMax[i])>height[i]){
+                sum=sum+Math.min(leftMax[i],rightMax[i])-height[i];
+            };
+        }
+        return sum;
+    }
+    public List<List<String>> groupAnagrams(String[] strs) {
+        HashMap<String,List<String>> map=new HashMap<>();
+        for(String str:strs){
+            char[] chars=new char[26];
+            for(char c:str.toCharArray()){
+                chars[c-'a']++;
+            }
+            StringBuilder sb=new StringBuilder();
+            for(int i=0;i< chars.length;i++){
+                if(chars[i]!=0) {
+                    sb.append((char)('a'+i));
+                    sb.append(chars[i]);
+                }
+            }
+
+
+            map.put(sb.toString(),map.getOrDefault(sb.toString(),new ArrayList<String>()).add(sb.toString()));
+        }
+        return new ArrayList<List<String>>(map.values());
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        LeetCode l=new LeetCode();
+        l.groupAnagrams(new String[]{"abc"});
+    }
+}
+
+class OddEven {
+    private int n = 0;
+
+    private volatile boolean odd = true;
+
+    private String lock = new String("lock");
+
+    public void odd() throws InterruptedException {
+        while (n < 100) {
+            synchronized (lock) {
+                while (!odd) {
+                    lock.wait();
+                }
+                print(n);
+                n++;
+                odd = false;
+                lock.notify();
+            }
+        }
+    }
+
+    public void even() throws InterruptedException {
+        while (n < 100) {
+            synchronized (lock) {
+                while (odd) {
+                    lock.wait();
+                }
+                print(n);
+                n++;
+                odd = true;
+                lock.notify();
+            }
+        }
+    }
+
+    private void print(int i) {
+        System.out.println(i);
     }
 }
