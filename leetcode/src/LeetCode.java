@@ -773,29 +773,278 @@ public class LeetCode {
         return sum;
     }
     public List<List<String>> groupAnagrams(String[] strs) {
-        HashMap<String,List<String>> map=new HashMap<>();
-        for(String str:strs){
-            char[] chars=new char[26];
-            for(char c:str.toCharArray()){
-                chars[c-'a']++;
+        HashMap<String, List<String>> map = new HashMap<>();
+        for (String str : strs) {
+            char[] chars = new char[26];
+            for (char c : str.toCharArray()) {
+                chars[c - 'a']++;
             }
-            StringBuilder sb=new StringBuilder();
-            for(int i=0;i< chars.length;i++){
-                if(chars[i]!=0) {
-                    sb.append((char)('a'+i));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < chars.length; i++) {
+                if (chars[i] != 0) {
+                    sb.append((char) ('a' + i));
                     sb.append(chars[i]);
                 }
             }
-
-
-            map.put(sb.toString(),map.getOrDefault(sb.toString(),new ArrayList<String>()).add(sb.toString()));
+            List<String> list = map.getOrDefault(sb.toString(), new ArrayList<String>());
+            list.add(str);
+            map.put(sb.toString(), list);
         }
         return new ArrayList<List<String>>(map.values());
     }
 
+    public int maxSubArray(int[] nums) {
+        int max=Integer.MIN_VALUE;
+        int cursum=0;
+        for(int i=0;i<nums.length;i++){
+            if(cursum<0){
+                cursum=nums[i];
+            }else{
+                cursum=cursum+nums[i];
+            }
+            max=Math.max(cursum,max);
+        }
+        return max;
+    }
+
+    public boolean canJump(int[] nums) {
+        int max=1;
+        for(int i=0;i<nums.length;i++){
+            if(i<max){
+                max=Math.max(max,i+nums[i]);
+            }
+            if(max>nums.length){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int[][] merge(int[][] intervals) {
+        List<int[]> merged=new ArrayList<>();
+        Arrays.sort(intervals,(o1,o2)->o1[0]-o2[0]);
+
+        for(int i=0;i<intervals.length;i++){
+            int l=intervals[i][0],r=intervals[i][1];
+            if (merged.size() == 0 || merged.get(merged.size() - 1)[1] < l) {
+                merged.add(new int[]{l, r});
+            }else{
+                merged.get(merged.size()-1)[1]=Math.max(merged.get(merged.size()-1)[1],r);
+            }
+        }
+
+        return merged.toArray(new int[merged.size()-1][]);
+    }
+
+    public int uniquePaths(int m, int n) {
+        int[][] dp=new int[m][n];
+        for(int i=0;i<=m-1;i++){
+            dp[i][0]=1;
+        }
+        for(int i=0;i<=n-1;i++){
+            dp[0][i]=1;
+        }
+        for(int i=1;i<m;i++){
+            for(int j=1;j<n;j++){
+                dp[i][j]=dp[i][j-1]+dp[i-1][j];
+            }
+        }
+        return dp[m-1][n-1];
+    }
+
+    public int minPathSum(int[][] grid) {
+        int m=grid.length,n=grid[0].length;
+        int[][] dp=new int[m][n];
+        int sum=0;
+        for(int i=0;i<=m-1;i++){
+            sum=grid[i][0]+sum;
+            dp[i][0]=sum;
+        }
+        sum=0;
+        for(int i=0;i<=n-1;i++){
+            sum=grid[0][i]+sum;
+            dp[0][i]=sum;
+        }
+        for(int i=1;i<m;i++){
+            for(int j=1;j<n;j++){
+                dp[i][j]=Math.min(dp[i-1][j],dp[i][j-1])+grid[i][j];
+            }
+        }
+        return dp[m-1][n-1];
+    }
+
+    public int climbStairs(int n) {
+        int[] dp=new int[n+1];
+        dp[0]=0;
+        dp[1]=1;
+        for(int i=2;i<=n;i++){
+            dp[i]=dp[i-1]+dp[i-2];
+        }
+        return dp[n];
+    }
+
+    public int minDistance(String word1, String word2) {
+
+        if(word1.length()==0){
+            return word2.length();
+        }
+        if(word2.length()==0){
+            return word1.length();
+        }
+        int m=word1.length(),n=word2.length();
+        int[][] dp=new int[m][n];
+        for(int i=0;i<=m-1;i++){
+            dp[i][0]=i;
+        }
+        for(int i=0;i<=n-1;i++){
+            dp[0][i]=i;
+        }
+        for(int i=1;i<m;i++){
+            for(int j=1;j<n;j++){
+                if(word1.charAt(i-1)==word2.charAt(j-1)){
+                    dp[i][j]=dp[i-1][j-1];
+                }else {
+                    dp[i][j] = Math.min(dp[i - 1][j-1]+1,Math.max(dp[i-1][j],dp[i][j-1])+1);
+                }
+            }
+        }
+        return dp[m-1][n-1];
+    }
+
+
+    public void sortColors(int[] nums) {
+        int i=0,p0=0;
+        int p2=nums.length-1;
+
+        while(i<=p2){
+            if(nums[i]==1){
+                i++;
+            }else if(nums[i]==2){
+                swap(nums,i,p2);
+                p2--;
+            }else{
+                swap(nums,i,p0);
+                p0++;
+                i++;
+            }
+        }
+    }
+
+    void swap(int[] s, int left, int right) {
+        int temp = s[left];
+        s[left] = s[right];
+        s[right] = temp;
+    }
+
+    public String minWindow(String s, String t) {
+        HashMap<Character,Integer> tmap=new HashMap<>();
+        HashMap<Character,Integer> smap=new HashMap<>();
+        int l=0,r=0;
+        int start=-1,end=-1;
+        int curMin=Integer.MAX_VALUE;
+        for(char c:t.toCharArray()){
+            tmap.put(c,tmap.getOrDefault(c,0)+1);
+        }
+        while(r<s.length()){
+            smap.put(s.charAt(r),smap.getOrDefault(s.charAt(r),0)+1);
+
+            while(check(smap,tmap)&&l<=r){
+                if(r-l+1<curMin) {
+                    start = l;
+                    end = r;
+                    curMin=end-start+1;
+                }
+                if (tmap.containsKey(s.charAt(l))) {
+                    smap.put(s.charAt(l), smap.getOrDefault(s.charAt(l), 0) - 1);
+                }
+                l++;
+            }
+            r++;
+        }
+        if(start==-1&&end==-1){
+            return "";
+        }
+        return s.substring(start,end+1);
+    }
+
+    private boolean check(Map<Character,Integer> s,Map<Character,Integer> t){
+        return t.keySet().stream().allMatch(key->t.getOrDefault(key,0)<=(s.getOrDefault(key,0)));
+    }
+
+
+
+    List<List<Integer>> list=new ArrayList<>();
+    public List<List<Integer>> subsets(int[] nums) {
+        backTrack(nums,0,new ArrayList<>());
+        return list;
+    }
+
+    private void backTrack(int[] nums,int index,List<Integer> temp){
+        list.add(new ArrayList<>(temp));
+        for(int i=index;i<nums.length;i++){
+            temp.add(nums[i]);
+            backTrack(nums,i+1,temp);
+            temp.remove(temp.size()-1);
+        }
+    }
+
+
+
+    int[][] direct=new int[][]{{0,1},{0,-1},{1,0},{-1,0}};
+    public boolean exist(char[][] board, String word) {
+        int[][] mark=new int[board.length][board[0].length];
+        for(int i=0;i< board.length;i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (dfs(board, i, j, 1, word,mark)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean dfs(char[][] board,int i,int j,int index,String word,int[][] mark){
+        if(word.charAt(index-1)!=board[i][j]){
+            return false;
+        }
+        if(index==word.length()){
+            return false;
+        }
+        mark[i][j]=1;
+        int newi,newj;
+        for(int[] dir:direct){
+            newi=i+dir[0];
+            newj=j+dir[1];
+            if(newi>=0&&newi<= board.length-1&&newj>=0&&newj<=board[0].length){
+                if(mark[newi][newj]==0){
+                    if(dfs(board,newi,newj,index+1,word,mark)){
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        mark[i][j]=0;
+        return false;
+    }
+
+
+    public int largestRectangleArea(int[] heights) {
+
+        LinkedList<Integer> stack=new LinkedList<>();
+        int max=0;
+        for(int i=0;i< heights.length;i++){
+            while(!stack.isEmpty()&&heights[stack.peek()]>heights[i]){
+                max=Math.max(heights[stack.peek()]*(i-stack.peek()+1),max);
+                stack.pop();
+            }
+            stack.push(i);
+        }
+        return max;
+    }
     public static void main(String[] args) throws InterruptedException {
         LeetCode l=new LeetCode();
-        l.groupAnagrams(new String[]{"abc"});
+        l.largestRectangleArea(new int[]{2,4});
     }
 }
 
