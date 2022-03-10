@@ -1042,10 +1042,354 @@ public class LeetCode {
         }
         return max;
     }
+
+    public boolean isSymmetric(TreeNode root) {
+        if(root==null) return true;
+        return isSymmetric0(root.left,root.right);
+    }
+    private boolean isSymmetric0(TreeNode l,TreeNode r){
+        if(l==null&&r==null) return true;
+        if(l==null||r==null) return false;
+        if(l.val!=r.val) return false;
+        return isSymmetric0(l.right,r.left)&&isSymmetric0(l.left,r.right);
+    }
+
+
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        LinkedList<TreeNode> queue=new LinkedList<>();
+        List<List<Integer>> result=new ArrayList<>();
+        queue.add(root);
+        while(!queue.isEmpty()){
+            int currentSize=queue.size();
+            List<Integer> list=new ArrayList<>();
+            for(int i=0;i<currentSize;i++){
+                TreeNode node=queue.poll();
+                list.add(node.val);
+                if(node.left!=null){
+                    queue.add(node.left);
+                }
+                if(node.right!=null){
+                    queue.add((node.right));
+                }
+            }
+            result.add(list);
+        }
+        return result;
+    }
+
+    public int maxDepth(TreeNode root) {
+        if(root==null) return 0;
+        return Math.max(maxDepth(root.left),maxDepth(root.right))+1;
+    }
+
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return buildTree0(preorder,inorder,0,preorder.length,0,inorder.length);
+    }
+
+    public TreeNode buildTree0(int[] preorder, int[] inorder,int pl,int pr,int il,int ir ){
+        if(pl>pr) return null;
+        TreeNode node=new TreeNode(preorder[pl]);
+        int index=findRootIndex(inorder,preorder[pl]);
+        node.left=buildTree0(preorder, inorder, pl+1, pl+(index-il), il, index-1);
+        node.right=buildTree0(preorder, inorder, pl+(index-il)+1, pr, index+1, ir);
+        return node;
+    }
+    private int findRootIndex(int[] inorder,int val){
+        for(int i=0;i<inorder.length;i++){
+            if(inorder[i]==val){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void flatten(TreeNode root) {
+        List<TreeNode> list=new ArrayList<>();
+        LinkedList<TreeNode> stack=new LinkedList<>();
+        TreeNode node=root;
+        stack.push(node);
+        while(!stack.isEmpty()){
+            while(node!=null){
+                list.add(node);
+                stack.push(node);
+                node=node.left;
+            }
+            node=stack.pop();
+            node=node.right;
+        }
+        for(int i=0;i<list.size();i++){
+            list.get(i).left=null;
+            list.get(i).right= list.get(i+1);
+        }
+    }
+
+
+
+
+    public int maxProfit(int[] prices) {
+        int sum=0;
+        int max=0;
+        int curMin=Integer.MAX_VALUE;
+        for(int i=0;i< prices.length;i++){
+            max=Math.max(max,prices[i]-curMin);
+            curMin=Math.min(curMin,prices[i]);
+        }
+        return max;
+    }
+
+    public int longestConsecutive(int[] nums) {
+        int longest=0;
+        Set<Integer> set=new HashSet<>();
+        for(int i=0;i<nums.length;i++){
+            set.add(nums[i]);
+        }
+        for(Integer s:set){
+            if(!set.contains(s+1)){
+                int curLong=1;
+                int i=s;
+                while(set.contains(i-1)){
+                    curLong++;
+                    i--;
+                }
+                longest=Math.max(curLong,longest);
+            }
+        }
+        return longest;
+    }
+
+    public boolean wordBreak(String s, List<String> wordDict) {
+        char[] chars=s.toCharArray();
+        boolean[] dp=new boolean[s.length()+1];
+        dp[0]=true;
+        for(int i=1;i<chars.length+1;i++) {
+            for (int j =0; j < i; j++) {
+                if (dp[j] && wordDict.contains(s.substring(j, i))) {
+                    dp[i] = true;
+                }
+            }
+        }
+        return dp[s.length()];
+    }
+
+    public boolean hasCycle(ListNode head) {
+        ListNode slow=head;
+        ListNode fast=head;
+        while(fast!=null&&fast.next!=null){
+            slow=slow.next;
+            fast=fast.next.next;
+            if(slow==fast){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public int singleNumber(int[] nums) {
+        int result=0;
+        for(int num:nums){
+            result=num^result;
+        }
+        return result;
+    }
+
+
+
+
+    public ListNode sortList(ListNode head) {
+        return sortList(head, null);
+    }
+
+    public ListNode sortList(ListNode head, ListNode tail) {
+        if (head == null) {
+            return head;
+        }
+        if (head.next == tail) {
+            head.next = null;
+            return head;
+        }
+        ListNode slow = head, fast = head;
+        while (fast != tail) {
+            slow = slow.next;
+            fast = fast.next;
+            if (fast != tail) {
+                fast = fast.next;
+            }
+        }
+        ListNode mid = slow;
+        ListNode list1 = sortList(head, mid);
+        ListNode list2 = sortList(mid, tail);
+        ListNode sorted = merge(list1, list2);
+        return sorted;
+    }
+
+    private ListNode merge(ListNode l1,ListNode l2){
+        if(l1==null)
+            return l2;
+        if(l2==null)
+            return l1;
+        if(l1.val<l2.val){
+            l1.next=merge(l1.next,l2);
+            return l1;
+        }else{
+            l2.next=merge(l1,l2.next);
+            return l2;
+        }
+    }
+
+
+    public int maxProduct(int[] nums) {
+        int length = nums.length;
+        int[] maxF = new int[length];
+        int[] minF = new int[length];
+        for(int i=0;i<length;i++){
+            maxF[i]=Math.max(maxF[i-1]*nums[i],Math.max(minF[i-1]*nums[i],nums[i]));
+            minF[i]=Math.min(maxF[i-1]*nums[i],Math.min(minF[i-1]*nums[i],nums[i]));
+        }
+        int ans = maxF[0];
+        for (int i = 1; i < length; ++i) {
+            ans = Math.max(ans, maxF[i]);
+        }
+        return ans;
+    }
+
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode result=null;
+        Set<ListNode> set=new HashSet<>();
+        while(headA!=null){
+            set.add(headA);
+            headA=headA.next;
+        }
+        while(headB!=null){
+            if(set.contains(headB)){
+                result=headB;
+                break;
+            }
+            headB=headB.next;
+        }
+        return result;
+    }
+
+
+    public int rob(int[] nums) {
+        if(nums.length==0) return 0;
+        if(nums.length==1) return nums[0];
+        int[] dp=new int[nums.length];
+        dp[0]=nums[0];
+        dp[1]=Math.max(nums[0],nums[1]);
+        for(int i=2;i<nums.length;i++){
+            dp[i]=Math.max(dp[i-2]+nums[i],dp[i-1]);
+        }
+        return dp[nums.length-1];
+    }
+
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> ad=new ArrayList<>();
+        for(int i=0;i<numCourses;i++){
+            ad.add(new ArrayList<>());
+        }
+        for(int[] pre:prerequisites){
+            ad.get(pre[0]).add(pre[1]);
+        }
+        for(int i=0;i<numCourses;i++){
+            if(!dfs(ad,new int[numCourses],i))
+                return false;
+        }
+        return true;
+    }
+
+
+    private boolean dfs(List<List<Integer>> adjacency, int[] flags, int i) {
+        if(flags[i] == 1) return false;
+        if(flags[i] == -1) return true;
+        flags[i] = 1;
+        for(Integer j : adjacency.get(i))
+            if(!dfs(adjacency, flags, j)) return false;
+        flags[i] = -1;
+        return true;
+    }
+
+
+
     public static void main(String[] args) throws InterruptedException {
         LeetCode l=new LeetCode();
-        l.largestRectangleArea(new int[]{2,4});
+        ListNode l1=new ListNode(1);
+        l1.next=new ListNode(4);
+        l1.next.next=new ListNode(2);
+        l1.next.next.next=new ListNode(3);
+        l.sortList(l1,null);
     }
+
+
+
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res=new ArrayList<>();
+        inorder0(root,res);
+        return  res;
+    }
+
+    private void inorder0(TreeNode root,List<Integer> res){
+        if(root==null) {
+            return;
+        }
+        inorder0(root.left,res);
+        res.add(root.val);
+        inorder0(root.right,res);
+
+    }
+
+
+    public int numTrees(int n) {
+        int[] dp=new int[n+1];
+        dp[0]=1;
+        dp[1]=1;
+        for(int i=2;i<n;i++)
+            for(int j=1;j<i+1;j++){
+                dp[i]=dp[i]+dp[j-1]*dp[i-j];
+            }
+        return dp[n];
+    }
+
+    public boolean isValidBST(TreeNode root) {
+        if(root==null){
+            return true;
+        }
+        return isValidBST0(root,Long.MIN_VALUE,Long.MAX_VALUE);
+    }
+
+    private boolean isValidBST0(TreeNode root,long lmax,long rmin){
+        if(root==null) return true;
+        if(root.val>lmax&&root.val<rmin){
+            return isValidBST0(root.left,lmax,root.val)&&isValidBST0(root.right,root.val,rmin);
+        }
+        return false;
+    }
+
+
+    public int numIslands(char[][] grid) {
+        int result=0;
+        for(int i=0;i<grid.length;i++){
+            for(int j=0;j<grid[0].length;j++){
+                if(grid[i][j]=='1') {
+                    result++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+        return result;
+    }
+
+    private void dfs(char[][] grid,int i,int j){
+        int[][] directs=new int[][]{{0,1},{1,0},{0,-1},{-1,0}};
+        if(i<0||i>=grid.length||j<0||j>=grid[0].length||grid[i][j]==0){
+            return;
+        }
+        grid[i][j]='0';
+        for(int[] direct:directs){
+            dfs(grid,i+direct[0],j+direct[1]);
+        }
+    }
+
 }
 
 class OddEven {
@@ -1087,3 +1431,4 @@ class OddEven {
         System.out.println(i);
     }
 }
+
