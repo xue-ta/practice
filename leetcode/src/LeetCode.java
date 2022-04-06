@@ -1157,6 +1157,86 @@ public class LeetCode {
         return longest;
     }
 
+    public TreeNode invertTree(TreeNode root) {
+        if(root==null) return null;
+        TreeNode temp=root.left;
+        root.left=invertTree(root.right);
+        root.right=invertTree(temp);
+        return root;
+    }
+
+    Map<Integer,TreeNode> sonAndParent=new HashMap<>();
+
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int startI=0;
+        int startJ=matrix[0].length;
+        while(startI<=matrix.length&&startJ>=0){
+            if(matrix[startI][startJ]==target){
+                return true;
+            }else if(matrix[startI][startJ]>target){
+                startI--;
+            }else{
+                startJ++;
+            }
+        }
+        return false;
+    }
+
+    public int numSquares(int n) {
+            int[] dp = new int[n + 1]; // 默认初始化值都为0
+            for (int i = 1; i <= n; i++) {
+                dp[i] = i; // 最坏的情况就是每次+1
+                for (int j = 1; i - j * j >= 0; j++) {
+                    dp[i] = Math.min(dp[i], dp[i - j * j] + 1); // 动态转移方程
+                }
+            }
+            return dp[n];
+    }
+
+
+    public List<Integer> findAnagrams(String s, String p) {
+       List<Integer> result=new ArrayList<>();
+       HashMap<Character,Integer> pmap=new HashMap<>();
+       HashMap<Character,Integer> smap=new HashMap<>();
+       for(int i=0;i<p.length();i++){
+           pmap.put(p.charAt(i),pmap.getOrDefault(p.charAt(i),0)+1);
+       }
+       int left=0,right=0;
+       while(right<s.length()){
+           smap.put(s.charAt(right),smap.getOrDefault(s.charAt(right),0)+1);
+           while(right-left+1==p.length()){
+               if(pmap.equals(smap)){
+                   result.add(left);
+               }
+               left++;
+               smap.put(s.charAt(right),smap.getOrDefault(s.charAt(right),0)-1);
+           }
+           right++;
+       }
+       return result;
+    }
+
+
+    int sum=0;
+    public TreeNode convertBST(TreeNode root) {
+        if(root!=null){
+            convertBST(root.right);
+            sum=sum+root.val;
+            root.val=sum;
+            convertBST(root.left);
+        }
+        return root;
+    }
+
+
+
+
+    public static void main(String[] args) throws InterruptedException {
+        LeetCode l=new LeetCode();
+    }
+
+
+
     public boolean wordBreak(String s, List<String> wordDict) {
         char[] chars=s.toCharArray();
         boolean[] dp=new boolean[s.length()+1];
@@ -1311,14 +1391,7 @@ public class LeetCode {
 
 
 
-    public static void main(String[] args) throws InterruptedException {
-        LeetCode l=new LeetCode();
-        ListNode l1=new ListNode(1);
-        l1.next=new ListNode(4);
-        l1.next.next=new ListNode(2);
-        l1.next.next.next=new ListNode(3);
-        l.sortList(l1,null);
-    }
+
 
 
 
@@ -1349,6 +1422,15 @@ public class LeetCode {
             }
         return dp[n];
     }
+
+    public TreeNode mirrorTree(TreeNode root) {
+        if(root==null) return null;
+        TreeNode temp=root.left;
+        root.left=mirrorTree(root.right);
+        root.right=mirrorTree(temp);
+        return root;
+    }
+
 
     public boolean isValidBST(TreeNode root) {
         if(root==null){
@@ -1432,3 +1514,42 @@ class OddEven {
     }
 }
 
+
+class Singleton0 {
+
+    //类初始化时，不初始化这个对象(延时加载，真正用的时候再创建)
+    private static Singleton0 instance;
+
+    //构造器私有化
+    private Singleton0(){}
+
+    //方法同步，调用效率低
+    public static synchronized Singleton0 getInstance(){
+        if(instance==null){
+            instance=new Singleton0();
+        }
+        return instance;
+    }
+}
+
+
+class Singleton {
+
+    //类初始化时，不初始化这个对象(延时加载，真正用的时候再创建)
+    private volatile static Singleton instance;
+
+    //构造器私有化
+    private Singleton(){}
+
+    //方法同步，调用效率低
+    public static Singleton getInstance(){
+        if(instance==null){
+            synchronized (Singleton.class) {
+                if(instance==null) {
+                    instance = new Singleton();
+                }
+            }
+        }
+        return instance;
+    }
+}
